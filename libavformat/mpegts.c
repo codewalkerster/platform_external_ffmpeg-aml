@@ -2153,9 +2153,8 @@ int ff_parse_mpeg2_descriptor(AVFormatContext *fc, AVStream *st, int stream_type
                     }
 #else
                     extradata += 2;
-#endif
-
                     *pp += 2;
+#endif
                 }
 
                 language[i * 4 - 1] = 0;
