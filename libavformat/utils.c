@@ -354,21 +354,22 @@ static int set_codec_from_probe_data(AVFormatContext *s, AVStream *st,
         enum AVCodecID id;
         enum AVMediaType type;
     } fmt_id_type[] = {
-        { "aac",       AV_CODEC_ID_AAC,        AVMEDIA_TYPE_AUDIO },
-        { "ac3",       AV_CODEC_ID_AC3,        AVMEDIA_TYPE_AUDIO },
-        { "aptx",      AV_CODEC_ID_APTX,       AVMEDIA_TYPE_AUDIO },
-        { "dts",       AV_CODEC_ID_DTS,        AVMEDIA_TYPE_AUDIO },
-        { "dvbsub",    AV_CODEC_ID_DVB_SUBTITLE,AVMEDIA_TYPE_SUBTITLE },
-        { "dvbtxt",    AV_CODEC_ID_DVB_TELETEXT,AVMEDIA_TYPE_SUBTITLE },
-        { "eac3",      AV_CODEC_ID_EAC3,       AVMEDIA_TYPE_AUDIO },
-        { "h264",      AV_CODEC_ID_H264,       AVMEDIA_TYPE_VIDEO },
-        { "hevc",      AV_CODEC_ID_HEVC,       AVMEDIA_TYPE_VIDEO },
-        { "loas",      AV_CODEC_ID_AAC_LATM,   AVMEDIA_TYPE_AUDIO },
-        { "m4v",       AV_CODEC_ID_MPEG4,      AVMEDIA_TYPE_VIDEO },
-        { "mjpeg_2000",AV_CODEC_ID_JPEG2000,   AVMEDIA_TYPE_VIDEO },
-        { "mp3",       AV_CODEC_ID_MP3,        AVMEDIA_TYPE_AUDIO },
-        { "mpegvideo", AV_CODEC_ID_MPEG2VIDEO, AVMEDIA_TYPE_VIDEO },
-        { "truehd",    AV_CODEC_ID_TRUEHD,     AVMEDIA_TYPE_AUDIO },
+        { "aac",       AV_CODEC_ID_AAC,             AVMEDIA_TYPE_AUDIO      },
+        { "ac3",       AV_CODEC_ID_AC3,             AVMEDIA_TYPE_AUDIO      },
+        { "aptx",      AV_CODEC_ID_APTX,            AVMEDIA_TYPE_AUDIO      },
+        { "dts",       AV_CODEC_ID_DTS,             AVMEDIA_TYPE_AUDIO      },
+        { "dvbsub",    AV_CODEC_ID_DVB_SUBTITLE,    AVMEDIA_TYPE_SUBTITLE   },
+        { "dvbtxt",    AV_CODEC_ID_DVB_TELETEXT,    AVMEDIA_TYPE_SUBTITLE   },
+        { "eac3",      AV_CODEC_ID_EAC3,            AVMEDIA_TYPE_AUDIO      },
+        { "h264",      AV_CODEC_ID_H264,            AVMEDIA_TYPE_VIDEO      },
+        { "hevc",      AV_CODEC_ID_HEVC,            AVMEDIA_TYPE_VIDEO      },
+        { "loas",      AV_CODEC_ID_AAC_LATM,        AVMEDIA_TYPE_AUDIO      },
+        { "m4v",       AV_CODEC_ID_MPEG4,           AVMEDIA_TYPE_VIDEO      },
+        { "mjpeg_2000",AV_CODEC_ID_JPEG2000,        AVMEDIA_TYPE_VIDEO      },
+        { "mp3",       AV_CODEC_ID_MP3,             AVMEDIA_TYPE_AUDIO      },
+        { "mpegvideo", AV_CODEC_ID_MPEG2VIDEO,      AVMEDIA_TYPE_VIDEO      },
+        { "truehd",    AV_CODEC_ID_TRUEHD,          AVMEDIA_TYPE_AUDIO      },
+        { "vvc",       AV_CODEC_ID_VVC,             AVMEDIA_TYPE_VIDEO      },
         { 0 }
     };
     int score;
@@ -1052,7 +1053,8 @@ static PacketList *get_next_pkt(AVFormatContext *s, AVStream *st, PacketList *pk
 
 static int64_t select_from_pts_buffer(AVStream *st, int64_t *pts_buffer, int64_t dts) {
     int onein_oneout = st->codecpar->codec_id != AV_CODEC_ID_H264 &&
-                       st->codecpar->codec_id != AV_CODEC_ID_HEVC;
+                       st->codecpar->codec_id != AV_CODEC_ID_HEVC &&
+                       st->codecpar->codec_id != AV_CODEC_ID_VVC;
 
     if(!onein_oneout) {
         int delay = st->internal->avctx->has_b_frames;
@@ -1240,7 +1242,8 @@ static void compute_pkt_fields(AVFormatContext *s, AVStream *st,
     int64_t offset;
     AVRational duration;
     int onein_oneout = st->codecpar->codec_id != AV_CODEC_ID_H264 &&
-                       st->codecpar->codec_id != AV_CODEC_ID_HEVC;
+                       st->codecpar->codec_id != AV_CODEC_ID_HEVC &&
+                       st->codecpar->codec_id != AV_CODEC_ID_VVC;
 
     if (s->flags & AVFMT_FLAG_NOFILLIN)
         return;
@@ -4385,7 +4388,7 @@ FF_ENABLE_DEPRECATION_WARNINGS
                 st->internal->info->frame_delay_evidence = 1;
         }
 #ifdef AMFFMPEG
-        if (st->codecpar->codec_id == AV_CODEC_ID_HEVC || st->codecpar->codec_id == AV_CODEC_ID_H264) {
+        if (st->codecpar->codec_id == AV_CODEC_ID_HEVC || st->codecpar->codec_id == AV_CODEC_ID_H264 || st->codecpar->codec_id == AV_CODEC_ID_VVC) {
             if (st->parser && st->parser->parser->split && !avctx->extradata) {
                 int i = st->parser->parser->split(avctx, pkt->data, pkt->size);
                 if (i > 0 && i < FF_MAX_EXTRADATA_SIZE) {

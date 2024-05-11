@@ -59,6 +59,7 @@ OBJS = ac3_parser.o                                                     \
        utils.o                                                          \
        vorbis_parser.o                                                  \
        xiph.o                                                           \
+       refstruct.o
 
 # subsystems
 OBJS-$(CONFIG_AANDCTTABLES)            += aandcttab.o

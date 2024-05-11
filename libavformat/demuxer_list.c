@@ -282,6 +282,7 @@ static const AVInputFormat * const demuxer_list[] = {
     &ff_vpk_demuxer,
     &ff_vplayer_demuxer,
     &ff_vqf_demuxer,
+    &ff_vvc_demuxer,
     &ff_w64_demuxer,
     &ff_wav_demuxer,
     &ff_wc3_demuxer,

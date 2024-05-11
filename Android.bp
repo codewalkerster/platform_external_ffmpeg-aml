@@ -203,6 +203,7 @@ filegroup {
         "libavcodec/dirac_dwt_template.c",
         "libavcodec/codec_list.c",
         "libavcodec/cbs_h265_syntax_template.c",
+        "libavcodec/cbs_h266_syntax_template.c",
         "libavcodec/cbs_mpeg2_syntax_template.c",
         "libavcodec/cbs_sei_syntax_template.c",
         "libavcodec/cbs_vp9_syntax_template.c",

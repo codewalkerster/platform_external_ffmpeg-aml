@@ -369,6 +369,7 @@ static const AVCodec * const codec_list[] = {
     &ff_vp9_decoder,
     &ff_vp9_v4l2m2m_decoder,
     &ff_vqa_decoder,
+    //&ff_vvc_decoder,
     &ff_webp_decoder,
     &ff_wrapped_avframe_decoder,
     &ff_wmv3_decoder,

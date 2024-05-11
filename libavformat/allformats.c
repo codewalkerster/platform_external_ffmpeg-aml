@@ -467,6 +467,7 @@ extern AVOutputFormat ff_voc_muxer;
 extern AVInputFormat  ff_vpk_demuxer;
 extern AVInputFormat  ff_vplayer_demuxer;
 extern AVInputFormat  ff_vqf_demuxer;
+extern AVInputFormat  ff_vvc_demuxer;
 extern AVInputFormat  ff_w64_demuxer;
 extern AVOutputFormat ff_w64_muxer;
 extern AVInputFormat  ff_wav_demuxer;
