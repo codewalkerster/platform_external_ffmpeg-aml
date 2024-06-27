@@ -2102,7 +2102,7 @@ int ff_parse_mpeg2_descriptor(AVFormatContext *fc, AVStream *st, int stream_type
             char pages_number_info[5] = {0};
             int pages_number = desc_len / 5;
             dvbpsi_teletext_dr_t * p_decoded;
-            p_decoded = (dvbpsi_teletext_dr_t*)malloc(sizeof(dvbpsi_teletext_dr_t));
+            p_decoded = NULL;
             av_log(fc, AV_LOG_ERROR, "0x56 language_count:%d\n", language_count);
 #endif
 
@@ -2133,18 +2133,22 @@ int ff_parse_mpeg2_descriptor(AVFormatContext *fc, AVStream *st, int stream_type
                     memcpy(extradata, *pp, 2);
 #ifdef AMFFMPEG
                     /*get teletext info*/
-                    tmp_extradata = (uint8_t)get8(pp, desc_end);
-                    p_decoded->p_pages[i].i_teletext_type = tmp_extradata >> 3;
-                    p_decoded->p_pages[i].i_teletext_magazine_number = tmp_extradata & 0x07;
-                    p_decoded->p_pages[i].i_teletext_page_number = (uint8_t)get8(pp, desc_end);
-                    av_log(fc, AV_LOG_ERROR, "0x56 i:%d pages_number:%d, type:0x%x, magazine:0x%x, pagenum:0x%x\n",
-                          i, pages_number, p_decoded->p_pages[i].i_teletext_type, p_decoded->p_pages[i].i_teletext_magazine_number, p_decoded->p_pages[i].i_teletext_page_number);
+                    p_decoded = (dvbpsi_teletext_dr_t*)av_malloc(sizeof(dvbpsi_teletext_dr_t));
+                    if (p_decoded) {
+                        tmp_extradata = (uint8_t)get8(pp, desc_end);
+                        p_decoded->p_pages[i].i_teletext_type = tmp_extradata >> 3;
+                        p_decoded->p_pages[i].i_teletext_magazine_number = tmp_extradata & 0x07;
+                        p_decoded->p_pages[i].i_teletext_page_number = (uint8_t)get8(pp, desc_end);
+                        av_log(fc, AV_LOG_ERROR, "0x56 i:%d pages_number:%d, type:0x%x, magazine:0x%x, pagenum:0x%x\n",
+                            i, pages_number, p_decoded->p_pages[i].i_teletext_type, p_decoded->p_pages[i].i_teletext_magazine_number, p_decoded->p_pages[i].i_teletext_page_number);
 
-                    sprintf(teletext_info + strlen(teletext_info), "%d,%d,%d#",
-                          p_decoded->p_pages[i].i_teletext_type, p_decoded->p_pages[i].i_teletext_magazine_number, p_decoded->p_pages[i].i_teletext_page_number);
-                    /*av_dict_set(&st->metadata, "teletext-type", p_decoded->p_pages[i].i_teletext_type, 0);
-                      av_dict_set(&st->metadata, "page-num", p_decoded->p_pages[i].i_teletext_magazine_number, 0);
-                      av_dict_set(&st->metadata, "magazine-num", p_decoded->p_pages[i].i_teletext_page_number, 0);*/
+                        sprintf(teletext_info + strlen(teletext_info), "%d,%d,%d#",
+                            p_decoded->p_pages[i].i_teletext_type, p_decoded->p_pages[i].i_teletext_magazine_number, p_decoded->p_pages[i].i_teletext_page_number);
+                        /*av_dict_set(&st->metadata, "teletext-type", p_decoded->p_pages[i].i_teletext_type, 0);
+                        av_dict_set(&st->metadata, "page-num", p_decoded->p_pages[i].i_teletext_magazine_number, 0);
+                        av_dict_set(&st->metadata, "magazine-num", p_decoded->p_pages[i].i_teletext_page_number, 0);*/
+                        av_free(p_decoded);
+                    }
 #else
                     extradata += 2;
 #endif
@@ -2608,7 +2612,7 @@ static AVStream *find_matching_stream(MpegTSContext *ts, int pid, unsigned int p
                                       int stream_identifier, int pmt_stream_idx, struct Program *p)
 {
     AVFormatContext *s = ts->stream;
-    int i;
+    int i = -1;
     AVStream *found = NULL;
 
     if (stream_identifier) { /* match based on "stream identifier descriptor" if present */

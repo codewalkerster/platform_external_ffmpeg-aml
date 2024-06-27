@@ -55,7 +55,7 @@ static int dtshd_read_header(AVFormatContext *s)
     DTSHDDemuxContext *dtshd = s->priv_data;
     AVIOContext *pb = s->pb;
     uint64_t chunk_type, chunk_size;
-    int64_t duration, data_start;
+    int64_t duration, data_start = -1ll;
     AVStream *st;
     int ret;
     char *value;
@@ -129,7 +129,8 @@ skip:
 
     if (!dtshd->data_end)
         return AVERROR_EOF;
-
+    if (data_start < 0)
+        return AVERROR_INVALIDDATA;
     avio_seek(pb, data_start, SEEK_SET);
 
 break_loop:

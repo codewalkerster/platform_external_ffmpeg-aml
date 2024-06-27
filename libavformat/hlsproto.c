@@ -663,6 +663,9 @@ retry:
                                &h->interrupt_callback, NULL,
                                h->protocol_whitelist, h->protocol_blacklist, h);
 #endif
+    if (opts) {
+        av_dict_free(&opts);
+    }
     if (ret < 0) {
         if (ff_check_interrupt(&h->interrupt_callback))
             return AVERROR_EXIT;

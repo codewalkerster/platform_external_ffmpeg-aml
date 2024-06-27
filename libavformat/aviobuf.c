@@ -833,7 +833,7 @@ int64_t ff_read_line_to_bprint(AVIOContext *s, AVBPrint *bp)
 {
     int len, end;
     int64_t read = 0;
-    char tmp[1024];
+    char tmp[1024] = {0};
     char c;
 
     do {

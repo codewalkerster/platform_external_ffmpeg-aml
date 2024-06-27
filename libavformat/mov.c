@@ -6483,7 +6483,7 @@ static int mov_read_frma(MOVContext *c, AVIOContext *pb, MOVAtom atom)
 static int get_current_encryption_info(MOVContext *c, MOVEncryptionIndex **encryption_index, MOVStreamContext **sc)
 {
     MOVFragmentStreamInfo *frag_stream_info;
-    AVStream *st;
+    AVStream *st = NULL;
     int i;
 
     frag_stream_info = get_current_frag_stream_info(&c->frag_index);
@@ -6495,6 +6495,8 @@ static int get_current_encryption_info(MOVContext *c, MOVEncryptionIndex **encry
             }
         }
         if (i == c->fc->nb_streams)
+            return 0;
+        if (!st)
             return 0;
         *sc = st->priv_data;
 
@@ -9132,6 +9134,10 @@ static int mov_seek_stream(AVFormatContext *s, AVStream *st, int64_t timestamp, 
         int want_sample = timestamp;
         if (want_sample > 0)
             sample = want_sample;
+        else {
+            av_log(s, AV_LOG_ERROR, "want_sample is invalid value[%d], set sample to [0] by default.", want_sample);
+            sample = 0;
+        }
     } else {
         sample = av_index_search_timestamp(st, timestamp, flags);
     }
