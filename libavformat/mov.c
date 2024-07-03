@@ -2167,6 +2167,11 @@ static int mov_read_glbl(MOVContext *c, AVIOContext *pb, MOVAtom atom)
     if ((uint64_t)atom.size > (1<<30))
         return AVERROR_INVALIDDATA;
 
+    if (atom.type == MKTAG('v','v','c','C')) {
+        avio_rb32(pb);
+        atom.size -= 4;
+    }
+
     if (atom.size >= 10) {
         // Broken files created by legacy versions of libavformat will
         // wrap a whole fiel atom inside of a glbl atom.
@@ -7895,6 +7900,7 @@ static const MOVParseTableEntry mov_default_parse_table[] = {
 { MKTAG('I','D','3','2'), mov_read_id32 }, /* id32 video box */
 { MKTAG('d','v','w','C'), mov_read_dvwC },
 { MKTAG('d','a','c','4'), mov_read_dac4 },
+{ MKTAG('v','v','c','C'), mov_read_glbl },
 #endif
 { MKTAG('d','O','p','s'), mov_read_dops },
 { MKTAG('d','m','l','p'), mov_read_dmlp },
