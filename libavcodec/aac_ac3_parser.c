@@ -91,6 +91,8 @@ get_next:
     }
 
 #ifdef AMFFMPEG
+    if (avctx->codec_id == AV_CODEC_ID_AC3 && s->codec_id == AV_CODEC_ID_EAC3)
+        avctx->codec_id = s->codec_id;
     if (s1->flags & PARSER_FLAG_HAS_ES_META) {
         if (s->codec_id)
             avctx->codec_id = s->codec_id;
