@@ -88,6 +88,8 @@ typedef struct HLSContext {
     int cur_seq_size;
 #ifdef AMFFMPEG
     int64_t durations;
+    int64_t cur_seg_duration;
+    int64_t cur_seg_position;
 #else
     int durations;
 #endif
@@ -115,6 +117,8 @@ static const AVOption hls_options[] = {
 #ifdef AMFFMPEG
     {"durations",  "durations", offsetof(HLSContext,durations),  AV_OPT_TYPE_INT64,{.i64 = 0}, 0, INT64_MAX, AV_OPT_FLAG_EXPORT},
     {"reconnect", "auto reconnect after ts-segment disconnect before EOF", offsetof(HLSContext,reconnect), AV_OPT_TYPE_BOOL, { .i64 = 0 }, 0, 1, AV_OPT_FLAG_DECODING_PARAM },
+    {"cur_seg_duration",  "cur_seg_duration", offsetof(HLSContext,cur_seg_duration),  AV_OPT_TYPE_INT64,{.i64 = 0}, 0, INT64_MAX, AV_OPT_FLAG_EXPORT},
+    {"cur_seg_position",  "cur_seg_position", offsetof(HLSContext,cur_seg_position),  AV_OPT_TYPE_INT64,{.i64 = 0}, 0, INT64_MAX, AV_OPT_FLAG_EXPORT},
 #else
     {"durations",  "durations", offsetof(HLSContext,durations),  AV_OPT_TYPE_INT,{.i64 = 0}, 0, INT_MAX, AV_OPT_FLAG_EXPORT},
 #endif
@@ -451,6 +455,9 @@ static int hls_open(URLContext *h, const char *uri, int flags)
 #ifdef AMFFMPEG
     memset(s->mBandWidth, 0, sizeof(s->mBandWidth));
     s->bandwidth_index = 0;
+    s->cur_seg_position = 0;
+    if (s->n_segments > 0)
+        s->cur_seg_duration = s->segments[0]->duration;
 #endif
     return 0;
 
@@ -550,9 +557,14 @@ start:
             if (bandwidth > 0)
                 s->mBandWidth[s->bandwidth_index++] = bandwidth;
         }
+        s->cur_seg_position += s->segments[cur_no]->duration;
 #endif
         ffurl_closep(&s->seg_hd);
         s->cur_seq_no++;
+#ifdef AMFFMPEG
+        if (s->n_segments > s->cur_seq_no)
+            s->cur_seg_duration = s->segments[s->cur_seq_no]->duration;
+#endif
     }
     reload_interval = s->n_segments > 0 ?
         s->segments[s->n_segments - 1]->duration :
@@ -636,6 +648,11 @@ retry:
                "skipping %d segments ahead, expired from playlist\n",
                s->start_seq_no - s->cur_seq_no);
         s->cur_seq_no = s->start_seq_no;
+#ifdef AMFFMPEG
+        s->cur_seg_position = 0;
+        if (s->n_segments > 0)
+            s->cur_seg_duration = s->segments[0]->duration;
+#endif
     }
     if (s->cur_seq_no - s->start_seq_no >= s->n_segments) {
         if (s->finished)
@@ -670,6 +687,12 @@ retry:
         if (ff_check_interrupt(&h->interrupt_callback))
             return AVERROR_EXIT;
         av_log(h, AV_LOG_WARNING, "Unable to open %s\n", url);
+#ifdef AMFFMPEG
+       if (s->cur_seq_no - s->start_seq_no < s->n_segments) {
+            s->cur_seg_position += s->segments[s->cur_seq_no - s->start_seq_no]->duration;
+            s->cur_seg_duration = s->segments[s->cur_seq_no - s->start_seq_no]->duration;
+       }
+#endif
         s->cur_seq_no++;
         goto retry;
     }
@@ -721,6 +744,14 @@ static int64_t hls_seek_ext(URLContext *h, int64_t off, int whence)
        }
     }
 #ifdef AMFFMPEG
+    s->cur_seg_position = 0;
+    for (i = 0; i < s->cur_seq_no - s->start_seq_no && i < s->n_segments; i++)
+    {
+        s->cur_seg_position += s->segments[i]->duration;
+    }
+    if (s->cur_seq_no - s->start_seq_no < s->n_segments)
+        s->cur_seg_duration = s->segments[s->cur_seq_no - s->start_seq_no]->duration;
+
     av_log(h, AV_LOG_WARNING, "hls_seek_ext cur_seq_no %d start_seq_no %d off 0x%llx \n", s->cur_seq_no,s->start_seq_no,off);
 #endif
 
