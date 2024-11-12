@@ -79,6 +79,9 @@ const enum AVCodecID ff_cbs_all_codec_ids[] = {
     AV_CODEC_ID_NONE
 };
 
+static int32_t stream_codec_id = AV_CODEC_ID_NONE;
+
+
 int ff_cbs_init(CodedBitstreamContext **ctx_ptr,
                 enum AVCodecID codec_id, void *log_ctx)
 {
@@ -90,6 +93,7 @@ int ff_cbs_init(CodedBitstreamContext **ctx_ptr,
     for (i = 0; i < FF_ARRAY_ELEMS(cbs_type_table); i++) {
         if (cbs_type_table[i]->codec_id == codec_id) {
             type = cbs_type_table[i];
+            stream_codec_id = codec_id;
             break;
         }
     }
@@ -884,7 +888,7 @@ static void *cbs_alloc_content(const CodedBitstreamUnitTypeDescriptor *desc)
                                             : cbs_default_free_unit_content);
 }
 
-int ff_cbs_alloc_unit_content(CodedBitstreamContext *ctx,
+int ff_cbs_alloc_unit_content2(CodedBitstreamContext *ctx,
                               CodedBitstreamUnit *unit)
 {
     const CodedBitstreamUnitTypeDescriptor *desc;
@@ -899,6 +903,34 @@ int ff_cbs_alloc_unit_content(CodedBitstreamContext *ctx,
     if (!unit->content_ref)
         return AVERROR(ENOMEM);
     unit->content = unit->content_ref;
+
+    return 0;
+}
+
+
+int ff_cbs_alloc_unit_content(CodedBitstreamContext *ctx,
+                               CodedBitstreamUnit *unit)
+{
+    if (stream_codec_id != AV_CODEC_ID_AV1)
+        return ff_cbs_alloc_unit_content2(ctx, unit);
+
+    const CodedBitstreamUnitTypeDescriptor *desc;
+
+    av_assert0(!unit->content && !unit->content_ref);
+
+    desc = cbs_find_unit_type_desc(ctx, unit);
+    if (!desc)
+        return AVERROR(ENOSYS);
+
+    unit->content = av_mallocz(desc->content_size);
+    if (!unit->content)
+        return AVERROR(ENOMEM);
+
+    unit->content_ref =
+        av_buffer_create(unit->content, desc->content_size,
+                         desc->type.complex.content_free ? desc->type.complex.content_free
+                                            : cbs_default_free_unit_content,
+                         (void*)desc, 0);
 
     return 0;
 }

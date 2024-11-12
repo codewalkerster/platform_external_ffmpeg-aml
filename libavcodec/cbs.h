@@ -424,8 +424,20 @@ void ff_cbs_fragment_free(CodedBitstreamFragment *frag);
  *
  * The content will be zeroed.
  */
+int ff_cbs_alloc_unit_content2(CodedBitstreamContext *ctx,
+                               CodedBitstreamUnit *unit);
 int ff_cbs_alloc_unit_content(CodedBitstreamContext *ctx,
-                              CodedBitstreamUnit *unit);
+                               CodedBitstreamUnit *unit);
+
+
+/**
+ * Allocate a new internal data buffer of the given size in the unit.
+ *
+ * The data buffer will have input padding.
+ */
+int ff_cbs_alloc_unit_data(CodedBitstreamUnit *unit,
+                           size_t size);
+
 
 /**
  * Insert a new unit into a fragment with the given content.
