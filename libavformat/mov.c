@@ -7412,7 +7412,17 @@ static void mov_get_dolby_vision_playback_mode(MOVContext *c, AVStream *st) {
                 /* Without VUI, a device will still */
                 /* make reasonable effort to present a picture. */
                 /*Playback HEVC bitstream using base-layer, and, if present, base layer’s VUI.*/
-                st->codec->has_dolby_vision_config_box = AV_DV_BOX_TYPE_UNKNOWN;
+                if (st->codec->dolby_vision_bl_compat_id != 0 &&
+                    st->codec->dolby_vision_bl_compat_id != 1 &&
+                    st->codec->dolby_vision_bl_compat_id != 2 &&
+                    st->codec->dolby_vision_bl_compat_id != 4 &&
+                    st->codec->dolby_vision_bl_compat_id != 6) {
+                    /*Reject playback*/
+                    /*Ccid not belonging to 0, 1, 2, 4, 6*/
+                    st->codec->has_dolby_vision_config_box = AV_DV_BOX_TYPE_ERROR;
+                } else {
+                    st->codec->has_dolby_vision_config_box = AV_DV_BOX_TYPE_UNKNOWN;
+                }
             }
         } else {
             /* Dolby Vision Configuration Box NOT present */
@@ -7463,7 +7473,17 @@ static void mov_get_dolby_vision_playback_mode(MOVContext *c, AVStream *st) {
                 /* VUI provides indication as to whether base layer is */
                 /* SDR or HLG. */
                 /*Playback AVC bitstream using base-layer, and, if present, base layer’s VUI.*/
-                st->codec->has_dolby_vision_config_box = AV_DV_BOX_TYPE_UNKNOWN;
+                if (st->codec->dolby_vision_bl_compat_id != 0 &&
+                    st->codec->dolby_vision_bl_compat_id != 1 &&
+                    st->codec->dolby_vision_bl_compat_id != 2 &&
+                    st->codec->dolby_vision_bl_compat_id != 4 &&
+                    st->codec->dolby_vision_bl_compat_id != 6) {
+                    /*Reject playback*/
+                    /*Ccid not belonging to 0, 1, 2, 4, 6*/
+                    st->codec->has_dolby_vision_config_box = AV_DV_BOX_TYPE_ERROR;
+                } else {
+                    st->codec->has_dolby_vision_config_box = AV_DV_BOX_TYPE_UNKNOWN;
+                }
             }
         } else  {
             /*Playback AVC bitstream other than Dolby Vision*/
