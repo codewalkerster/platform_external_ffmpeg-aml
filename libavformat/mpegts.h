@@ -142,7 +142,9 @@
 #define STREAM_TYPE_AUDIO_DTS       0x82
 #define STREAM_TYPE_AUDIO_TRUEHD    0x83
 #define STREAM_TYPE_AUDIO_EAC3      0x87
-
+#ifdef AMFFMPEG
+#define STREAM_TYPE_AUDIO_MPEGH     0x2d
+#endif
 /* ISO/IEC 13818-1 Table 2-22 */
 #define STREAM_ID_PRIVATE_STREAM_1   0xbd
 #define STREAM_ID_AUDIO_STREAM_0     0xc0

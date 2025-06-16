@@ -829,6 +829,9 @@ static const StreamType ISO_types[] = {
     { 0x04, AVMEDIA_TYPE_AUDIO, AV_CODEC_ID_MP3        },
     { 0x0f, AVMEDIA_TYPE_AUDIO, AV_CODEC_ID_AAC        },
     { 0x10, AVMEDIA_TYPE_VIDEO, AV_CODEC_ID_MPEG4      },
+#ifdef AMFFMPEG
+    { 0x2d, AVMEDIA_TYPE_AUDIO, AV_CODEC_ID_MPEGH_3D_AUDIO},
+#endif
     /* Makito encoder sets stream type 0x11 for AAC,
      * so auto-detect LOAS/LATM instead of hardcoding it. */
 #if !CONFIG_LOAS_DEMUXER

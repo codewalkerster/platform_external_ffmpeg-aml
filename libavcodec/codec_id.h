@@ -509,9 +509,10 @@ enum AVCodecID {
     AV_CODEC_ID_ATRAC3PAL,
 #ifdef AMFFMPEG
     AV_CODEC_ID_AC4,
+    AV_CODEC_ID_AVS3_AUDIO,        // AVS3-P3 3D Audio/Audio Vivid Audio Codec ID
     AV_CODEC_ID_DRA       = MKBETAG('D','A','R','1'),
 #endif
-    AV_CODEC_ID_DOLBY_E,
+    AV_CODEC_ID_DOLBY_E = AV_CODEC_ID_ATRAC3PAL + 3,
     AV_CODEC_ID_APTX,
     AV_CODEC_ID_APTX_HD,
     AV_CODEC_ID_SBC,
@@ -523,7 +524,6 @@ enum AVCodecID {
     AV_CODEC_ID_HCA,
     AV_CODEC_ID_FASTAUDIO,
 #ifdef AMFFMPEG
-    AV_CODEC_ID_AVS3_AUDIO,        // AVS3-P3 3D Audio/Audio Vivid Audio Codec ID
     AV_CODEC_ID_DTS_X,
 #endif
 
