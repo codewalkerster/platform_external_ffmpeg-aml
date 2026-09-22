@@ -5,6 +5,7 @@ import (
     "android/soong/cc"
     "os/exec"
     "fmt"
+    "strings"
 )
 
 func init() {
@@ -48,14 +49,12 @@ func getCflags(ctx android.BaseContext) ([]string) {
     if giterr != nil {
         fmt.Printf("get git err, gitout %s\n", gitout)
     } else {
-        gitversion := "" + string(gitout)
-        buildname := " (" + string(ctx.Config().Getenv("LOGNAME")) + " "
-        timecmd, timeerr := exec.Command("/bin/bash", "-c", "date").CombinedOutput()
-        buildtime := " " + string(timecmd) + ")"
-        if timeerr != nil {
-            fmt.Println("get time error")
-        }
-        ver := "-DGIT_INFO=" + "\"" + gitversion + buildname + buildtime + "\""
+        // No build date here: it changes on every soong run, which changes
+        // the clang command line and makes ninja rebuild the whole module.
+        // The git hash is stable across builds, so it is kept.
+        gitversion := strings.TrimSpace(string(gitout))
+        buildname := strings.TrimSpace(string(ctx.Config().Getenv("LOGNAME")))
+        ver := "-DGIT_INFO=" + "\"" + gitversion + " (" + buildname + ")" + "\""
         cflags = append(cflags, ver)
     }
 
